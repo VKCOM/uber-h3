@@ -93,39 +93,39 @@ if(H3_IS_ROOT_PROJECT)
 endif()
 
 set(LIB_SOURCE_FILES
-    src/include/h3lib/bbox.h
-    src/include/h3lib/polygon.h
-    src/include/h3lib/polygonAlgos.h
-    src/include/h3lib/h3Index.h
-    src/include/h3lib/h3UniEdge.h
-    src/include/h3lib/geoCoord.h
-    src/include/h3lib/vec2d.h
-    src/include/h3lib/vec3d.h
-    src/include/h3lib/linkedGeo.h
-    src/include/h3lib/localij.h
-    src/include/h3lib/baseCells.h
-    src/include/h3lib/faceijk.h
-    src/include/h3lib/vertexGraph.h
-    src/include/h3lib/mathExtensions.h
-    src/include/h3lib/constants.h
-    src/include/h3lib/coordijk.h
-    src/include/h3lib/algos.h
-    src/lib/h3lib/algos.c
-    src/lib/h3lib/coordijk.c
-    src/lib/h3lib/bbox.c
-    src/lib/h3lib/polygon.c
-    src/lib/h3lib/h3Index.c
-    src/lib/h3lib/vec2d.c
-    src/lib/h3lib/vec3d.c
-    src/lib/h3lib/vertex.c
-    src/lib/h3lib/linkedGeo.c
-    src/lib/h3lib/localij.c
-    src/lib/h3lib/geoCoord.c
-    src/lib/h3lib/h3UniEdge.c
-    src/lib/h3lib/mathExtensions.c
-    src/lib/h3lib/vertexGraph.c
-    src/lib/h3lib/faceijk.c
-    src/lib/h3lib/baseCells.c)
+    src/include/h3/bbox.h
+    src/include/h3/polygon.h
+    src/include/h3/polygonAlgos.h
+    src/include/h3/h3Index.h
+    src/include/h3/h3UniEdge.h
+    src/include/h3/geoCoord.h
+    src/include/h3/vec2d.h
+    src/include/h3/vec3d.h
+    src/include/h3/linkedGeo.h
+    src/include/h3/localij.h
+    src/include/h3/baseCells.h
+    src/include/h3/faceijk.h
+    src/include/h3/vertexGraph.h
+    src/include/h3/mathExtensions.h
+    src/include/h3/constants.h
+    src/include/h3/coordijk.h
+    src/include/h3/algos.h
+    src/lib/h3/algos.c
+    src/lib/h3/coordijk.c
+    src/lib/h3/bbox.c
+    src/lib/h3/polygon.c
+    src/lib/h3/h3Index.c
+    src/lib/h3/vec2d.c
+    src/lib/h3/vec3d.c
+    src/lib/h3/vertex.c
+    src/lib/h3/linkedGeo.c
+    src/lib/h3/localij.c
+    src/lib/h3/geoCoord.c
+    src/lib/h3/h3UniEdge.c
+    src/lib/h3/mathExtensions.c
+    src/lib/h3/vertexGraph.c
+    src/lib/h3/faceijk.c
+    src/lib/h3/baseCells.c)
 set(APP_SOURCE_FILES
     src/apps/applib/include/test.h
     src/apps/applib/include/kml.h
@@ -212,8 +212,8 @@ set(OTHER_SOURCE_FILES
 set(ALL_SOURCE_FILES
     ${LIB_SOURCE_FILES} ${APP_SOURCE_FILES} ${OTHER_SOURCE_FILES})
 
-set(UNCONFIGURED_API_HEADER src/include/h3lib/h3api.h.in)
-set(CONFIGURED_API_HEADER src/include/h3lib/h3api.h)
+set(UNCONFIGURED_API_HEADER src/include/h3/h3api.h.in)
+set(CONFIGURED_API_HEADER src/include/h3/h3api.h)
 configure_file(${UNCONFIGURED_API_HEADER} ${CONFIGURED_API_HEADER})
 
 set(INSTALL_TARGETS)
@@ -255,8 +255,8 @@ function(add_h3_library name h3_alloc_prefix_override)
         target_compile_definitions(${name} PUBLIC H3_HAVE_VLA)
     endif()
     target_include_directories(${name} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/h3lib>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/include/h3lib>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/h3>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/include/h3>)
 endfunction()
 
 # Build the H3 library
@@ -689,10 +689,10 @@ install(
 )
 
 # Headers:
-#   * src/include/h3lib/h3api.h -> <prefix>/include/h3/h3api.h
+#   * src/include/h3/h3api.h -> <prefix>/include/h3/h3api.h
 # Only the h3api.h header is needed by applications using H3.
 install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/src/include/h3lib/h3api.h"
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/src/include/h3/h3api.h"
     DESTINATION "${include_install_dir}/h3"
     COMPONENT libh3-dev
 )

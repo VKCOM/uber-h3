@@ -104,4 +104,4 @@ KML/res*cells.kml
 KML/res*centers.kml
 
 # Generated files
-src/include/h3lib/h3api.h
+src/include/h3/h3api.h
