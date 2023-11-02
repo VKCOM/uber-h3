@@ -56,7 +56,7 @@ list(GET H3_VERSION_LIST 1 H3_VERSION_MINOR)
 list(GET H3_VERSION_LIST 2 H3_VERSION_PATCH)
 set(H3_SOVERSION 1)
 
-project(h3 LANGUAGES C VERSION ${H3_VERSION})
+project(uber-h3 LANGUAGES C VERSION ${H3_VERSION})
 
 # Detect if someone else is including the package
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -83,6 +83,7 @@ if(NOT WIN32)
     if(WARNINGS_AS_ERRORS)
         list(APPEND H3_COMPILE_FLAGS -Werror)
     endif()
+    list(APPEND H3_COMPILE_FLAGS -fPIC)
 endif()
 
 include(CMakeDependentOption)
@@ -92,39 +93,39 @@ if(H3_IS_ROOT_PROJECT)
 endif()
 
 set(LIB_SOURCE_FILES
-    src/h3lib/include/bbox.h
-    src/h3lib/include/polygon.h
-    src/h3lib/include/polygonAlgos.h
-    src/h3lib/include/h3Index.h
-    src/h3lib/include/h3UniEdge.h
-    src/h3lib/include/geoCoord.h
-    src/h3lib/include/vec2d.h
-    src/h3lib/include/vec3d.h
-    src/h3lib/include/linkedGeo.h
-    src/h3lib/include/localij.h
-    src/h3lib/include/baseCells.h
-    src/h3lib/include/faceijk.h
-    src/h3lib/include/vertexGraph.h
-    src/h3lib/include/mathExtensions.h
-    src/h3lib/include/constants.h
-    src/h3lib/include/coordijk.h
-    src/h3lib/include/algos.h
-    src/h3lib/lib/algos.c
-    src/h3lib/lib/coordijk.c
-    src/h3lib/lib/bbox.c
-    src/h3lib/lib/polygon.c
-    src/h3lib/lib/h3Index.c
-    src/h3lib/lib/vec2d.c
-    src/h3lib/lib/vec3d.c
-    src/h3lib/lib/vertex.c
-    src/h3lib/lib/linkedGeo.c
-    src/h3lib/lib/localij.c
-    src/h3lib/lib/geoCoord.c
-    src/h3lib/lib/h3UniEdge.c
-    src/h3lib/lib/mathExtensions.c
-    src/h3lib/lib/vertexGraph.c
-    src/h3lib/lib/faceijk.c
-    src/h3lib/lib/baseCells.c)
+    src/include/h3/bbox.h
+    src/include/h3/polygon.h
+    src/include/h3/polygonAlgos.h
+    src/include/h3/h3Index.h
+    src/include/h3/h3UniEdge.h
+    src/include/h3/geoCoord.h
+    src/include/h3/vec2d.h
+    src/include/h3/vec3d.h
+    src/include/h3/linkedGeo.h
+    src/include/h3/localij.h
+    src/include/h3/baseCells.h
+    src/include/h3/faceijk.h
+    src/include/h3/vertexGraph.h
+    src/include/h3/mathExtensions.h
+    src/include/h3/constants.h
+    src/include/h3/coordijk.h
+    src/include/h3/algos.h
+    src/lib/h3/algos.c
+    src/lib/h3/coordijk.c
+    src/lib/h3/bbox.c
+    src/lib/h3/polygon.c
+    src/lib/h3/h3Index.c
+    src/lib/h3/vec2d.c
+    src/lib/h3/vec3d.c
+    src/lib/h3/vertex.c
+    src/lib/h3/linkedGeo.c
+    src/lib/h3/localij.c
+    src/lib/h3/geoCoord.c
+    src/lib/h3/h3UniEdge.c
+    src/lib/h3/mathExtensions.c
+    src/lib/h3/vertexGraph.c
+    src/lib/h3/faceijk.c
+    src/lib/h3/baseCells.c)
 set(APP_SOURCE_FILES
     src/apps/applib/include/test.h
     src/apps/applib/include/kml.h
@@ -211,8 +212,8 @@ set(OTHER_SOURCE_FILES
 set(ALL_SOURCE_FILES
     ${LIB_SOURCE_FILES} ${APP_SOURCE_FILES} ${OTHER_SOURCE_FILES})
 
-set(UNCONFIGURED_API_HEADER src/h3lib/include/h3api.h.in)
-set(CONFIGURED_API_HEADER src/h3lib/include/h3api.h)
+set(UNCONFIGURED_API_HEADER src/include/h3/h3api.h.in)
+set(CONFIGURED_API_HEADER src/include/h3/h3api.h)
 configure_file(${UNCONFIGURED_API_HEADER} ${CONFIGURED_API_HEADER})
 
 set(INSTALL_TARGETS)
@@ -254,8 +255,8 @@ function(add_h3_library name h3_alloc_prefix_override)
         target_compile_definitions(${name} PUBLIC H3_HAVE_VLA)
     endif()
     target_include_directories(${name} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/h3lib/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/h3lib/include>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/h3>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src/include/h3>)
 endfunction()
 
 # Build the H3 library
@@ -688,10 +689,10 @@ install(
 )
 
 # Headers:
-#   * src/h3lib/include/h3api.h -> <prefix>/include/h3/h3api.h
+#   * src/include/h3/h3api.h -> <prefix>/include/h3/h3api.h
 # Only the h3api.h header is needed by applications using H3.
 install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/src/h3lib/include/h3api.h"
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/src/include/h3/h3api.h"
     DESTINATION "${include_install_dir}/h3"
     COMPONENT libh3-dev
 )
@@ -718,18 +719,23 @@ install(
 set(CPACK_DEB_COMPONENT_INSTALL 1)
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
-# set(CPACK_DEBIAN_PACKAGE_MAINTAINER "TEST PACKAGE") # Required
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "DEFAULT") # Required
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://www.h3geo.org")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
-set(CPACK_DEBIAN_LIBH3_PACKAGE_DEPENDS "libc6 (>= 2.27)")
-set(CPACK_DEBIAN_LIBH3-DEV_PACKAGE_DEPENDS "libh3 (= ${H3_VERSION})")
-set(CPACK_DEBIAN_H3_PACKAGE_DEPENDS "libc6 (>= 2.27), libh3 (= ${H3_VERSION})")
+set(CPACK_DEBIAN_LIBH3_PACKAGE_DEPENDS "libc6 (>= 2.19)")
+if(CPACK_DEBIAN_PACKAGE_VERSION)
+    set(CPACK_DEBIAN_LIBH3-DEV_PACKAGE_DEPENDS "libuber-h3 (= ${CPACK_DEBIAN_PACKAGE_VERSION})")
+    set(CPACK_DEBIAN_H3_PACKAGE_DEPENDS "libc6 (>= 2.19), libuber-h3 (= ${CPACK_DEBIAN_PACKAGE_VERSION})")
+else()
+    set(CPACK_DEBIAN_LIBH3-DEV_PACKAGE_DEPENDS "libuber-h3 (= ${H3_VERSION})")
+    set(CPACK_DEBIAN_H3_PACKAGE_DEPENDS "libc6 (>= 2.19), libuber-h3 (= ${H3_VERSION})")
+endif()
 set(CPACK_DEBIAN_LIBH3_DESCRIPTION "Library files for the H3 hexagonal discrete global grid system.")
 set(CPACK_DEBIAN_LIBH3-DEV_DESCRIPTION "Development files and headers for the H3 hexagonal discrete global grid system.")
 set(CPACK_DEBIAN_H3_DESCRIPTION "UNIX style filter (command line) tools for the H3 hexagonal discrete global grid system.")
-set(CPACK_DEBIAN_LIBH3_PACKAGE_NAME "libh3")
-set(CPACK_DEBIAN_LIBH3-DEV_PACKAGE_NAME "libh3-dev")
-set(CPACK_DEBIAN_H3_PACKAGE_NAME "h3")
+set(CPACK_DEBIAN_LIBH3_PACKAGE_NAME "libuber-h3")
+set(CPACK_DEBIAN_LIBH3-DEV_PACKAGE_NAME "libuber-h3-dev")
+set(CPACK_DEBIAN_H3_PACKAGE_NAME "uber-h3")
 set(CPACK_DEBIAN_LIBH3_PACKAGE_SECTION "libs")
 set(CPACK_DEBIAN_LIBH3-DEV_PACKAGE_SECTION "libdevel")
 set(CPACK_DEBIAN_H3_PACKAGE_SECTION "science")
