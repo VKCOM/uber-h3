@@ -80,8 +80,6 @@ CMakeDoxygenDefaults.cmake
 DartConfiguration.tcl
 compile_commands.json
 RunCoverage.cmake
-# Generated coverage runner
-scripts/coverage.sh
 
 # CTest / coverage
 CTestTestfile.cmake

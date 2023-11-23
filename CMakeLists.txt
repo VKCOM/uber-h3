@@ -29,7 +29,6 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain.cmake"
     CACHE FILEPATH
     "Toolchain to use for building this project")
 
-option(ENABLE_COVERAGE "Enable compiling tests with coverage." ON)
 option(BUILD_BENCHMARKS "Build benchmarking applications." ON)
 option(BUILD_FILTERS "Build filter applications." ON)
 option(BUILD_GENERATORS "Build code generation applications." ON)
@@ -69,15 +68,6 @@ if(NOT WIN32)
     # Compiler options are set only on non-Windows, since these options
     # are not correct for MSVC.
     list(APPEND H3_COMPILE_FLAGS -Wall)
-
-    list(APPEND H3_COMPILE_FLAGS $<$<CONFIG:Debug>:-gdwarf-2 -g3 -O0 -fno-inline -fno-eliminate-unused-debug-types>)
-
-    if(ENABLE_COVERAGE)
-        list(APPEND H3_COMPILE_FLAGS $<$<CONFIG:Debug>:--coverage>)
-        # --coverage is not passed to the linker, so this option is needed
-        # to fully enable coverage.
-        list(APPEND H3_LINK_FLAGS $<$<CONFIG:Debug>:--coverage>)
-    endif()
 
     option(WARNINGS_AS_ERRORS "Warnings are treated as errors" OFF)
     if(WARNINGS_AS_ERRORS)
@@ -422,20 +412,6 @@ if(H3_IS_ROOT_PROJECT AND BUILD_TESTING)
     # Macros and support code needed to build and add the tests
     set(test_number 0)
 
-    if(ENABLE_COVERAGE)
-        file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/scripts/coverage.sh"
-                      INPUT "${CMAKE_CURRENT_SOURCE_DIR}/scripts/coverage.sh.in")
-        set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "coverage.info")
-        set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "coverage.cleaned.info")
-        set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "coverage")
-        add_custom_target(coverage
-            COMMAND bash "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/scripts/coverage.sh" "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
-        add_custom_target(clean-coverage
-            # Before running coverage, clear all counters
-            COMMAND lcov --rc lcov_branch_coverage=1 --directory '${CMAKE_CURRENT_BINARY_DIR}' --zerocounters
-            COMMENT "Zeroing counters"
-            )
-    endif()
 
     add_h3_library(h3WithTestAllocators test_prefix_)
 
@@ -457,15 +433,6 @@ if(H3_IS_ROOT_PROJECT AND BUILD_TESTING)
 
         add_test(NAME ${name}_test${test_number} COMMAND ${TEST_WRAPPER} "$<TARGET_FILE:${name}>")
 
-        if(ENABLE_COVERAGE)
-            add_custom_target(${name}_coverage${test_number}
-                COMMAND ${name} > /dev/null
-                COMMENT "Running ${name}_coverage${test_number}"
-                )
-
-            add_dependencies(coverage ${name}_coverage${test_number})
-            add_dependencies(${name}_coverage${test_number} clean-coverage)
-        endif()
     endmacro()
 
     macro(add_h3_test_common name srcfile)
@@ -480,16 +447,6 @@ if(H3_IS_ROOT_PROJECT AND BUILD_TESTING)
     macro(add_h3_test name srcfile)
         add_h3_test_common(${name} ${srcfile})
         add_test(NAME ${name}_test${test_number} COMMAND ${TEST_WRAPPER} "$<TARGET_FILE:${name}>")
-
-        if(ENABLE_COVERAGE)
-            add_custom_target(${name}_coverage${test_number}
-                COMMAND ${name} > /dev/null
-                COMMENT "Running ${name}_coverage${test_number}"
-                )
-
-            add_dependencies(coverage ${name}_coverage${test_number})
-            add_dependencies(${name}_coverage${test_number} clean-coverage)
-        endif()
     endmacro()
 
     macro(add_h3_test_with_file name srcfile argfile)
@@ -504,15 +461,6 @@ if(H3_IS_ROOT_PROJECT AND BUILD_TESTING)
             message("${name}_test${test_number} - ${argfile}")
         endif()
 
-        if(ENABLE_COVERAGE)
-            add_custom_target(${name}_coverage${test_number}
-                COMMAND ${name} < ${argfile} > /dev/null
-                COMMENT "Running ${name}_coverage${test_number}"
-                )
-
-            add_dependencies(coverage ${name}_coverage${test_number})
-            add_dependencies(${name}_coverage${test_number} clean-coverage)
-        endif()
     endmacro()
 
     macro(add_h3_test_with_arg name srcfile arg)
@@ -524,15 +472,6 @@ if(H3_IS_ROOT_PROJECT AND BUILD_TESTING)
             message("${name}_test${test_number} - ${arg}")
         endif()
 
-        if(ENABLE_COVERAGE)
-            add_custom_target(${name}_coverage${test_number}
-                COMMAND ${name} ${arg}
-                COMMENT "Running ${name}_coverage${test_number}"
-                )
-
-            add_dependencies(coverage ${name}_coverage${test_number})
-            add_dependencies(${name}_coverage${test_number} clean-coverage)
-        endif()
     endmacro()
 
     # Add each individual test
